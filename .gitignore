@@ -1,0 +1,28 @@
+# DEPENDÊNCIAS
+node_modules/
+**/node_modules/
+
+# VARIÁVEIS DE AMBIENTE
+.env
+.env_local
+.env*.local
+
+# BUILD
+.next/
+dist/
+build/
+
+# LOGS
+.log
+npm-debug.log*
+
+# EDITOR
+.vscode/
+.DS_Store
+
+# NEST
+/backend/dist/
+
+# NEXT
+/frontend/.next/
+/frontend/out/
