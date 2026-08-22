@@ -3,6 +3,10 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+// ----- ETAPAS PARA RODAR A MIGRAÇÃO ------
+// cd backend
+// npx prisma migrate dev --name nome_da_migracao
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -23,4 +27,25 @@ model Endereco {
   cidade String
   created DateTime @default(now())
   modified DateTime @updatedAt
+  usuarios Usuario[]
+}
+
+enum StatusUsuario {
+  ATIVO
+  INATIVO
+  BLOQUEADO
+}
+
+model Usuario {
+  id Int @id @default(autoincrement())
+  nome String
+  cpf String @unique
+  telefone String
+  email String @unique
+  status StatusUsuario @default(ATIVO)
+  senha String
+  enderecoId Int
+  created DateTime @default(now())
+  modified DateTime @updatedAt
+  endereco Endereco @relation(fields: [enderecoId], references: [id])
 }
