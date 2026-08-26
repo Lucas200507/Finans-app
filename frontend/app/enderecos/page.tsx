@@ -1,12 +1,28 @@
 import { Endereco } from '@/types/endereco';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation'; // redireciona para outra página, caso não tenha o cookie do token (Server Component), router.push não funciona em Server Component apenas em Client Component
 import Link from 'next/link';
-import BotaoExcluir from './BotaoExcluir';
+import BotaoExcluir from './BotaoExcluir'
+import BotaoLogout from './BotaoLogout';
 
 async function getEnderecos(): Promise<Endereco[]>{
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.getAll()
+        .map((c) => `${c.name}=${c.value}`) // transforma o array de cookies em um array de strings no formato "nome=valor"
+        .join('; '); // transforma o array de strings em uma única string separada por "; " (formato esperado pelo header cookie)
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/enderecos`, {
         cache: 'no-store', // Não guarda em cache a resposta, sempre buscar dados novos
+        headers: {
+            // Pega o cookie do navegador e envia para a API
+            cookie: cookieHeader,
+        },
     });
-    return res.json();
+
+    if (res.status === 401) {
+        redirect('/login'); // redireciona para a página de login caso não tenha o cookie do token
+    }
+
+    return res.json(); 
 }
 // componente assincrono. Só é possível em Server Component
 export default async function EnderecosPage(){
@@ -15,6 +31,7 @@ export default async function EnderecosPage(){
     return(
         <div>
             <h1>Endereços cadastrados</h1>
+            <BotaoLogout/>
             <table>
                 <thead>
                     <tr>
@@ -50,7 +67,7 @@ export default async function EnderecosPage(){
                       ))
                     }
                 </tbody>
-            </table>
+            </table>            
         </div>
     )
 }
