@@ -14,7 +14,8 @@ export default function BotaoExcluir({id}: BotaoExluirProps){
         if (resposta){
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/enderecos/${id}`, {
-                    method: 'DELETE',                    
+                    method: 'DELETE',
+                    credentials: 'include',
                 });
                 
                 if (!res.ok){

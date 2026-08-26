@@ -41,6 +41,7 @@ export default function EnderecosForm({enderecoExistente}: EnderecosFormProps){
                 method: metodo,
                 // Corpo vem em formato json
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 // Converte o conteudo em JSON
                 body: JSON.stringify({
                     cep,
