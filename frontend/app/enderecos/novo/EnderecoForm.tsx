@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react'; // para guardar os valores digitados de forma simutânea
 import { useRouter } from 'next/navigation';
+import {Endereco} from '@/types/endereco'; // Importando a interface do endereço
 
 // Criando a interface, para descrever o que o componente espera receber
 interface EnderecosFormProps {    

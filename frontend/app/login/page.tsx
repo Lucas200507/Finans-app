@@ -1,46 +1,24 @@
-"use client";
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
-export default function LoginPage(){
-    const router = useRouter();
-    const [email, setEmail ] = useState('');
-    const [senha, setSenha] = useState('');
-    const [mensagem, setMensagem] = useState('');
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import LoginForm from './LoginForm';
+
+export default async function LoginPage() {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.getAll()
+      .map((c) => `${c.name}=${c.value}`).join('; ');
     
-    async function handleSubmit(e: React.FormEvent){
-        e.preventDefault();
-
-        try{
-            // irá retornar o token
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'include', // para enviar o cookie de volta para o navegador
-                body: JSON.stringify({email, senha})
-            });
-
-            if(!res.ok){
-                throw new Error('Credenciais inválidas');
-            }            
-            
-            router.push('/enderecos');
-        } catch(error){
-            setMensagem('Email ou senha inválidos');
-        }
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+        headers: {
+            'Cookie': cookieHeader
+        },
+        cache: 'no-store' // impede que o Next.js faça cache da resposta
+    });
+    // para impedir que o usuário logado acesse a página de login, redirecionando para a página de endereços
+    if (res.ok) {
+        redirect('/enderecos');
     }
-    return (
-        <form onSubmit={handleSubmit}>
-            <label>
-                Email: 
-                <input type='email' value={email} onChange={(e) => setEmail(e.target.value)} />                    
-            </label>
-            <label>
-                Senha:
-                <input type='password' value={senha} onChange={(e) => setSenha(e.target.value)} />
-            </label>
-            <button type='submit'>Entrar</button>
-            {mensagem && <p style={{color: 'red'}}>{mensagem}</p>}
-        </form>
-    );    
+
+    return <LoginForm />;
+
 }
