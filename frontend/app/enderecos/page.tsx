@@ -1,15 +1,12 @@
 import { Endereco } from '@/types/endereco';
+import { Usuario } from '@/types/usuario';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation'; // redireciona para outra página, caso não tenha o cookie do token (Server Component), router.push não funciona em Server Component apenas em Client Component
 import Link from 'next/link';
 import BotaoExcluir from './BotaoExcluir'
 import BotaoLogout from './BotaoLogout';
 
-async function getEnderecos(): Promise<Endereco[]>{
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.getAll()
-        .map((c) => `${c.name}=${c.value}`) // transforma o array de cookies em um array de strings no formato "nome=valor"
-        .join('; '); // transforma o array de strings em uma única string separada por "; " (formato esperado pelo header cookie)
+async function getEnderecos(cookieHeader: string): Promise<Endereco[]>{
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/enderecos`, {
         cache: 'no-store', // Não guarda em cache a resposta, sempre buscar dados novos
         headers: {
@@ -24,12 +21,30 @@ async function getEnderecos(): Promise<Endereco[]>{
 
     return res.json(); 
 }
+
+async function getUsuarioLogado(cookieHeader: string): Promise<Usuario> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+        cache: 'no-store', // Não guarda em cache a resposta, sempre buscar dados novos
+        headers: {
+            // Pega o cookie do navegador e envia para a API
+            cookie: cookieHeader,
+        },
+    });
+
+    return res.json();
+} 
+
 // componente assincrono. Só é possível em Server Component
 export default async function EnderecosPage(){
-    const enderecos = await getEnderecos();
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.getAll()
+      .map((c) => `${c.name}=${c.value}`).join('; ');
+    const enderecos = await getEnderecos(cookieHeader);
+    const usuario = await getUsuarioLogado(cookieHeader);
 
     return(
         <div>
+            <h2>Olá, {usuario.nome} !</h2>
             <h1>Endereços cadastrados</h1>
             <BotaoLogout/>
             <table>
