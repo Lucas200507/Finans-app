@@ -1,6 +1,6 @@
 # FINANS
 
-Sistema pessoal de controle financeiro, desenvolvido como projeto de estudo e uso prático, com foco em consolidar uma stack full-stack moderna em TypeScript. Motivado pela necessidade de organizar as finanças de pequenos negócios de revenda de produtos administrados por familiares.
+Sistema pessoal de controle financeiro, desenvolvido como projeto de estudo e uso prático, com foco em consolidar uma stack full-stack moderna em TypeScript. Motivado pela necessidade de organizar as finanças de pequenos negócios de revenda de produtos administrados por familiares. Hoje é também o principal projeto de portfólio de Lucas em sua busca por vagas de desenvolvedor.
 
 > 📄 Para a documentação completa do sistema (visão geral, modelagem de dados, decisões técnicas), veja `FINANS-Documentacao-Tecnica.docx`.
 
@@ -16,7 +16,9 @@ Sistema pessoal de controle financeiro, desenvolvido como projeto de estudo e us
 | Banco de dados | [PostgreSQL](https://www.postgresql.org/) |
 | ORM | [Prisma](https://www.prisma.io/) v6 |
 | Validação de dados | class-validator / DTOs |
-| Estrutura de projeto | Monorepo |
+| Hash de senha | bcrypt |
+| Autenticação | JWT (JwtStrategy + JwtAuthGuard), migrando para cookie HttpOnly |
+| Estrutura de projeto | Monorepo (Git) |
 
 > ℹ️ O projeto usa Prisma **v6** (não a v7) devido a conflitos de compatibilidade ESM/CommonJS encontrados durante a configuração inicial.
 
@@ -64,10 +66,11 @@ npm install
 
 ### 3. Configurar variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto (ou dentro de `apps/backend`, conforme a configuração) com a URL de conexão do banco:
+Crie um arquivo `.env` na raiz do projeto (ou dentro de `apps/backend`, conforme a configuração) com a URL de conexão do banco e o segredo do JWT:
 
 ```env
 DATABASE_URL="postgresql://usuario:senha@localhost:5432/finans?schema=public"
+JWT_SECRET="sua-chave-secreta"
 ```
 
 ### 4. Rodar as migrations do Prisma
@@ -76,7 +79,7 @@ DATABASE_URL="postgresql://usuario:senha@localhost:5432/finans?schema=public"
 npx prisma migrate dev
 ```
 
-Isso cria as tabelas no banco de dados de acordo com o `schema.prisma` (atualmente contendo, no mínimo, a entidade `Endereco`).
+Isso cria as tabelas no banco de dados de acordo com o `schema.prisma` (atualmente contendo as entidades `Endereco` e `Usuario`, com enums e relacionamentos).
 
 ### 5. (Opcional) Gerar o Prisma Client
 
@@ -100,15 +103,17 @@ cd apps/frontend
 npm run dev
 ```
 
-O frontend deve ficar disponível em `http://localhost:3000` e o backend em `http://localhost:3001` (ajustar portas conforme configuração real do projeto).
+O frontend fica disponível em `http://localhost:3000` e o backend em `http://localhost:3001`.
 
 ---
 
 ## 🧩 Status atual
 
+- [x] Setup do monorepo em Git
 - [x] Entidade **Endereco** — schema, migration, DTOs, endpoints CRUD e telas implementados
-- [ ] Entidade **Usuario**
-- [ ] **Auth** (autenticação/autorização)
+- [x] Entidade **Usuario** — schema com enums/relações, DTOs, endpoints CRUD, senhas com bcrypt
+- [x] **Autenticação JWT** — JwtStrategy + JwtAuthGuard implementados
+- [ ] **Migração de auth para cookie HttpOnly** — backend parcialmente ajustado, frontend pendente
 - [ ] Entidade **Empresa**
 - [ ] Lançamentos financeiros (receitas/despesas)
 - [ ] Relatórios e dashboards
@@ -120,6 +125,7 @@ O frontend deve ficar disponível em `http://localhost:3000` e o backend em `htt
 - **Prisma v7 → v6:** downgrade necessário por conflitos de ESM/CommonJS.
 - **Next.js 15 — `params` assíncrono:** rotas dinâmicas exigem `await` ao acessar `params`.
 - **CORS:** configurado no NestJS para permitir requisições do frontend em desenvolvimento.
+- **Auth: localStorage → cookie HttpOnly:** o token JWT era guardado no localStorage (vulnerável a XSS); migração em andamento para cookies HttpOnly. Backend parcialmente atualizado, frontend ainda pendente.
 
 Mais detalhes sobre cada decisão estão na documentação técnica completa.
 

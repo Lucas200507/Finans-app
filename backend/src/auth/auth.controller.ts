@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Post, Body, Res, Get, Req, UseGuards } from '@nestjs/common';
+import type { Response , Request} from 'express';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -28,4 +29,11 @@ export class AuthController {
     res.clearCookie('token'); // limpa o cookie do navegador
     return {message: 'Logout realizado com sucesso'};
   }
+
+  @UseGuards(JwtAuthGuard) // Somente com cookie (Logado)
+  @Get('me')
+  async me(@Req() req: Request){ // @Req -> é o decorator que dá acesso ao objeto de requisição do Express
+      return req.user; // Retorna os dados do usuário logado
+  }
+
 }

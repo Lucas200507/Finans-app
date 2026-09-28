@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateEnderecoDto } from './dto/create-endereco.dto';
 import { UpdateEnderecoDto } from './dto/update-endereco.dto';
 import { PrismaService } from '../prisma/prisma.service'; // para conexão ao banco
@@ -29,9 +29,17 @@ export class EnderecosService {
     });
   }
 
-  remove(id: number) {
+ async remove(id: number) {
+    const empresaVinculada = await this.prisma.empresa.findFirst({
+      where: { enderecoId: id },
+    });
+
+    if (empresaVinculada) {
+      throw new ConflictException('Não é possível excluir: este endereço está vinculado a uma empresa.');
+    }
+
     return this.prisma.endereco.delete({
-      where: {id},
+      where: { id },
     });
   }
 }
