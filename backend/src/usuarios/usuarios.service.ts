@@ -68,9 +68,15 @@ export class UsuariosService {
   }
 
   update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
+    const dadosParaAtualizar: any = {...updateUsuarioDto};
+
+    if (updateUsuarioDto.senha){
+      dadosParaAtualizar.senha = bcrypt.hashSync(updateUsuarioDto.senha, 10); // 10x gerados, complicando o hash
+    }
+
     return this.prisma.usuario.update({
       where: {id},
-      data: updateUsuarioDto,
+      data: dadosParaAtualizar,
       select: {
         id: true,
         nome: true,

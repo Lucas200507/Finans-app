@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { Request } from 'express';
+import { UsuariosService } from '../usuarios/usuarios.service';
 
 function extrairTokenDoCookie(req: Request): string | null {
   if (req && req.cookies) {
@@ -12,7 +13,7 @@ function extrairTokenDoCookie(req: Request): string | null {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private usuariosService: UsuariosService) {
     const jwtSecret = process.env.JWT_SECRET;
 
     if (!jwtSecret) {
@@ -27,6 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return { id: payload.sub, email: payload.email };
+    return this.usuariosService.findOne(payload.sub); // sub é o id do usuário que foi colocado no payload
   }
 }

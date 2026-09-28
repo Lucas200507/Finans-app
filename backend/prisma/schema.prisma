@@ -28,6 +28,7 @@ model Endereco {
   created DateTime @default(now())
   modified DateTime @updatedAt
   usuarios Usuario[]
+  empresas Empresa[]
 }
 
 enum StatusUsuario {
@@ -44,8 +45,59 @@ model Usuario {
   email String @unique
   status StatusUsuario @default(ATIVO)
   senha String
-  enderecoId Int
+  enderecoId Int?
+  created DateTime @default(now())
+  modified DateTime @updatedAt
+  endereco Endereco? @relation(fields: [enderecoId], references: [id])
+  empresaUsuarios Empresa_Usuario[]
+}
+
+enum StatusEmpresa {
+  ATIVA
+  INATIVA
+  SUSPENSA
+}
+
+
+model Empresa {
+  id Int @id @default(autoincrement())
+  cnpj String @unique
+  nome String
+  enderecoId  Int
+  telefone String 
+  email String @unique
+  status StatusEmpresa @default(ATIVA)
   created DateTime @default(now())
   modified DateTime @updatedAt
   endereco Endereco @relation(fields: [enderecoId], references: [id])
+  empresaUsuarios Empresa_Usuario[]
+}
+
+enum PapelUsuario {
+  CONTRIBUIDOR
+  ADMINISTRADOR
+  SOCIO
+}
+
+// Para um Adm ou Socio de empresa quiser convidar um novo integrante
+enum StatusConvite {
+  PENDENTE
+  ACEITO
+  RECUSADO
+}
+
+// @@unique -> combinacao de X e Y nao podem se repetir
+
+model Empresa_Usuario {
+  id        Int           @id @default(autoincrement())
+  empresaId Int
+  usuarioId Int
+  papel     PapelUsuario  @default(CONTRIBUIDOR)
+  status    StatusConvite @default(PENDENTE)
+  created   DateTime      @default(now())
+  modified  DateTime      @updatedAt
+  empresa   Empresa       @relation(fields: [empresaId], references: [id])
+  usuario   Usuario       @relation(fields: [usuarioId], references: [id])
+
+  @@unique([empresaId, usuarioId])
 }

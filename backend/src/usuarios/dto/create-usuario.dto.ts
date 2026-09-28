@@ -26,7 +26,8 @@ export class CreateUsuarioDto {
     @IsNotEmpty()
     senha: string;
 
+    @IsOptional()
     @IsNumber()
-    enderecoId: number;    
+    enderecoId?: number;    
 
 }
