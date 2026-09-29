@@ -101,3 +101,11 @@ model Empresa_Usuario {
 
   @@unique([empresaId, usuarioId])
 }
+
+model TipoPagamento {
+  id        Int           @id @default(autoincrement())
+  nome      String @unique
+  aceitaParcelamento Boolean @default(true)  
+  created   DateTime      @default(now())
+  modified  DateTime      @updatedAt
+}
